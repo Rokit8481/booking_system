@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Кімнати{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h2>Список кімнат</h2>
+    {% for room in rooms %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Кімната №{{ room.number }}</h5>
+          <p class="card-text">{{ room.description|default:"Без опису" }}</p>
+          <p>Ціна: {{ room.price_per_hour }} грн/год</p>
+          <p>Вмістимість: {{ room.capacity }} ос.</p>
+          <a href="{% url 'room' room.pk %}" class="btn btn-sm btn-outline-primary">Деталі</a>
+        </div>
+      </div>
+    {% empty %}
+      <div class="alert alert-info">Немає доступних кімнат.</div>
+    {% endfor %}
+  </div>
+{% endblock %}
