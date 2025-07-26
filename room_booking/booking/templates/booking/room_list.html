@@ -3,20 +3,53 @@
 {% block title %}Кімнати{% endblock %}
 
 {% block content %}
-  <div class="container">
-    <h2>Список кімнат</h2>
-    {% for room in rooms %}
-      <div class="card mb-3">
-        <div class="card-body">
-          <h5 class="card-title">Кімната №{{ room.number }}</h5>
-          <p class="card-text">{{ room.description|default:"Без опису" }}</p>
-          <p>Ціна: {{ room.price_per_hour }} грн/год</p>
-          <p>Вмістимість: {{ room.capacity }} ос.</p>
-          <a href="{% url 'room' room.pk %}" class="btn btn-sm btn-outline-primary">Деталі</a>
+<div class="container">
+  <h2>Список кімнат</h2>
+
+  {% for room in rooms %}
+    <div class="card mb-4">
+      <div class="row g-0">
+        <div class="col-md-4">
+          {% if room.images.all %}
+          <div id="carouselRoom{{ room.id }}" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+              {% for image in room.images.all %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                  <a href="{% url 'room' room.pk %}">
+                    <img src="{{ image.image.url }}" class="d-block w-100" style="height: 200px; object-fit: cover;" alt="Фото кімнати">
+                  </a>
+                </div>
+              {% endfor %}
+            </div>
+            {% if room.images.count > 1 %}
+              <button class="carousel-control-prev" type="button" data-bs-target="#carouselRoom{{ room.id }}" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#carouselRoom{{ room.id }}" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+              </button>
+            {% endif %}
+          </div>
+          {% else %}
+            <div class="text-muted text-center" style="height: 200px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+              <span>Без фото</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title">Кімната №{{ room.number }}</h5>
+            <p class="card-text">{{ room.description|default:"Без опису" }}</p>
+            <p>Ціна: {{ room.price_per_hour }} грн/год</p>
+            <p>Вмістимість: {{ room.capacity }} ос.</p>
+            <a href="{% url 'room' room.pk %}" class="btn btn-sm btn-outline-primary">Деталі</a>
+          </div>
         </div>
       </div>
-    {% empty %}
-      <div class="alert alert-info">Немає доступних кімнат.</div>
-    {% endfor %}
-  </div>
+    </div>
+  {% empty %}
+    <div class="alert alert-info">Немає доступних кімнат.</div>
+  {% endfor %}
+</div>
 {% endblock %}

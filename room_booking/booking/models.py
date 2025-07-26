@@ -2,9 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Room(models.Model):
-    number = models.IntegerField(unique = True)
+    number = models.PositiveIntegerField(unique = True)
     description = models.TextField(blank = True)
-    capacity = models.IntegerField()
+    capacity = models.PositiveIntegerField()
     price_per_hour = models.DecimalField(max_digits = 6, decimal_places = 2)
     is_active = models.BooleanField(default=True) 
 
@@ -14,6 +14,17 @@ class Room(models.Model):
     class Meta:
         verbose_name = "Кімната"
         verbose_name_plural = "Кімнати"
+
+class RoomImage(models.Model):
+    room = models.ForeignKey(Room, on_delete = models.CASCADE, related_name = 'images')
+    image = models.ImageField(upload_to = 'room_images/')
+
+    def __str__(self):
+        return f"Фото кімнати №{self.room}"
+    
+    class Meta:
+        verbose_name = "Фото кімнати"
+        verbose_name_plural = "Фото кімнат"
 
 class Booking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')

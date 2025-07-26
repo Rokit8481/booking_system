@@ -5,6 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import Room, Booking
 from django.http import HttpRequest
 from django.utils import timezone
+from .forms import BookingForm
 
 
 def room_list(request: HttpRequest):
@@ -15,8 +16,10 @@ def room_list(request: HttpRequest):
 
 def room(request: HttpRequest, pk):
     room = get_object_or_404(Room, pk=pk)
-    return render(request, 'room.html', {
+    images = room.images.all()
+    return render(request, 'booking/room.html', {
         'room': room,
+        'images': images
     })
 
 @login_required
@@ -26,7 +29,7 @@ def book_room(request: HttpRequest, pk):
         start_time = request.POST.get('start_time')
         end_time = request.POST.get('end_time')
         if not start_time or not end_time:
-            return render(request, 'book_room.html', {
+            return render(request, 'booking/book_room.html', {
                 'room': room,
                 'error': 'Потрібно вказати початок і кінець бронювання.'
             })
@@ -44,16 +47,31 @@ def cancel_booking(request: HttpRequest, pk: int):
     if request.method == 'POST':
         booking.delete()
         return redirect('my_bookings')
-    return render(request, 'cancel_booking.html', {'booking': booking})
+    return render(request, 'booking/cancel_booking.html', {'booking': booking})
 
+@login_required
+def edit_booking(request: HttpRequest, pk: int):
+    booking = get_object_or_404(Booking, pk=pk, user=request.user)
+    
+    if request.method == 'POST':
+        form = BookingForm(request.POST, instance=booking)
+        if form.is_valid():
+            form.save()
+            return redirect('my_bookings')
+    else:
+        form = BookingForm(instance=booking)
 
+    return render(request, 'booking/edit_booking.html', {
+        'form': form,
+        'booking': booking
+    })
 @login_required
 def my_bookings(request: HttpRequest):
     user = request.user
     now = timezone.now()
     future_bookings = Booking.objects.filter(user = user, start_time__gte=now).order_by('start_time')
     past_bookings = Booking.objects.filter(user = user, end_time__lt=now).order_by('-start_time')
-    return render(request, 'my_bookings.html', {
+    return render(request, 'booking/my_bookings.html', {
         'future_bookings': future_bookings,
         'past_bookings': past_bookings
     })
@@ -67,8 +85,8 @@ def login_view(request: HttpRequest):
             login(request, user)
             return redirect('room_list')
         else:
-            return render(request, 'login.html', {'error': 'Неправильні дані для входу'})
-    return render(request, 'login.html')
+            return render(request, 'registration/login.html', {'error': 'Неправильні дані для входу'})
+    return render(request, 'registration/login.html')
 
 
 def logout_view(request: HttpRequest):
@@ -84,4 +102,4 @@ def register(request: HttpRequest):
             return redirect('room_list')
     else:
         form = UserCreationForm()
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'registration/register.html', {'form': form})
