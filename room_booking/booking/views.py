@@ -23,23 +23,22 @@ def room(request: HttpRequest, pk):
     })
 
 @login_required
-def book_room(request: HttpRequest, pk):
-    room = get_object_or_404(Room, pk = pk)
+def book_room(request: HttpRequest, pk: int):
+    room = get_object_or_404(Room, pk=pk)
+    booking = Booking(user=request.user, room=room)
+
     if request.method == 'POST':
-        start_time = request.POST.get('start_time')
-        end_time = request.POST.get('end_time')
-        if not start_time or not end_time:
-            return render(request, 'booking/book_room.html', {
-                'room': room,
-                'error': 'Потрібно вказати початок і кінець бронювання.'
-            })
-        Booking.objects.create(
-            user = request.user , 
-            room=room,
-            start_time=start_time,
-            end_time=end_time
-        )
-        return redirect('my_bookings')  
+        form = BookingForm(request.POST, instance=booking)
+        if form.is_valid():
+            form.save()
+            return redirect('my_bookings')
+    else:
+        form = BookingForm(instance=booking)
+
+    return render(request, 'booking/book_room.html', {
+        'form': form,
+        'room': room,
+    })
 
 @login_required
 def cancel_booking(request: HttpRequest, pk: int):
@@ -65,6 +64,7 @@ def edit_booking(request: HttpRequest, pk: int):
         'form': form,
         'booking': booking
     })
+
 @login_required
 def my_bookings(request: HttpRequest):
     user = request.user
