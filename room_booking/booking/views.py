@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from .models import Room, Booking
 from django.http import HttpRequest
 from django.utils import timezone
@@ -76,22 +76,17 @@ def my_bookings(request: HttpRequest):
         'past_bookings': past_bookings
     })
 
-def login_view(request: HttpRequest):
+def login_view(request):
+    form = AuthenticationForm(request, data=request.POST or None)
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user:
-            login(request, user)
+        if form.is_valid():
+            login(request, form.get_user())
             return redirect('room_list')
-        else:
-            return render(request, 'registration/login.html', {'error': 'Неправильні дані для входу'})
-    return render(request, 'registration/login.html')
-
+    return render(request, 'registration/login.html', {'form': form})
 
 def logout_view(request: HttpRequest):
     logout(request)
-    return redirect('login')
+    return redirect('/')
 
 def register(request: HttpRequest):
     if request.method == 'POST':
