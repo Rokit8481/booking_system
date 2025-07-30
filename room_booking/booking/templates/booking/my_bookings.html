@@ -1,9 +1,79 @@
 {% extends 'base.html' %}
 
-{% block title %}Мої Бронювання{% endblock %}
+{% block title %}Мої бронювання{% endblock %}
 
 {% block content %}
+  <div class="container mt-4">
+    <h2 class="mb-4">Бронювання користувача: {{user.username}}</h2>
+
+    <h4>Майбутні:</h4>
+    {% if future_bookings %}
+      <ul class="list-group mb-4">
+        {% for booking in future_bookings %}
+          <li class="list-group-item">
+            Кімната №{{ booking.room.number }}: з {{ booking.start_time|date:"d.m.Y H:i" }} до {{ booking.end_time|date:"d.m.Y H:i" }}
+          </li>
+          <div class="d-flex justify-content-between mb-2">
+            <div>
+              <a href="{% url 'edit_booking' booking.pk %}" class="btn btn-outline-success btn-sm">Редагувати бронювання</a>
+            </div>
+            <div>
+              <form action="{% url 'cancel_booking' booking.pk %}" method="POST">
+                {% csrf_token %}
+                <button type="submit">Скасувати бронювання</button>
+            </div>
+          </div>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Немає майбутніх бронювань.</p>
+    {% endif %}
+
+    <h4>Поточні бронювання:</h4>
+    {% if active_bookings %}
+      <ul class="list-group mb-4">
+        {% for booking in active_bookings %}
+          <li class="list-group-item">
+            Кімната №{{ booking.room.number }}: з {{ booking.start_time|date:"d.m.Y H:i" }} до {{ booking.end_time|date:"d.m.Y H:i" }}
+          </li>
+          <div class="d-flex justify-content-between mb-2">
+            <div>
+              <a href="{% url 'edit_booking' booking.pk %}" class="btn btn-outline-success btn-sm">Редагувати бронювання</a>
+            </div>
+            <div>
+              <form action="{% url 'cancel_booking' booking.pk %}" method="POST">
+                {% csrf_token %}
+                <button type="submit">Скасувати бронювання</button>
+            </div>
+          </div>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Немає активних бронювань.</p>
+    {% endif %}
 
 
-
+    <h4>Минулих:</h4>
+    {% if past_bookings %}
+      <ul class="list-group">
+        {% for booking in past_bookings %}
+          <li class="list-group-item">
+            Кімната №{{ booking.room.number }}: з {{ booking.start_time|date:"d.m.Y H:i" }} до {{ booking.end_time|date:"d.m.Y H:i" }}
+          </li>
+          <div class="d-flex justify-content-between mb-2">
+            <div>
+              <a href="{% url 'edit_booking' booking.pk %}" class="btn btn-outline-success btn-sm">Редагувати бронювання</a>
+            </div>
+            <div>
+              <form action="{% url 'cancel_booking' booking.pk %}" method="POST">
+                {% csrf_token %}
+                <button type="submit">Скасувати бронювання</button>
+            </div>
+          </div>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Немає минулих бронювань.</p>
+    {% endif %}
+  </div>
 {% endblock %}

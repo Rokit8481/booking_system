@@ -46,7 +46,7 @@ def cancel_booking(request: HttpRequest, pk: int):
     if request.method == 'POST':
         booking.delete()
         return redirect('my_bookings')
-    return render(request, 'booking/cancel_booking.html', {'booking': booking})
+    return render(request, 'booking/my_bookings.html', {'booking': booking})
 
 @login_required
 def edit_booking(request: HttpRequest, pk: int):
@@ -70,10 +70,12 @@ def my_bookings(request: HttpRequest):
     user = request.user
     now = timezone.now()
     future_bookings = Booking.objects.filter(user = user, start_time__gte=now).order_by('start_time')
+    active_bookings = Booking.objects.filter(user=user, start_time__lte=now, end_time__gte=now).order_by('start_time')
     past_bookings = Booking.objects.filter(user = user, end_time__lt=now).order_by('-start_time')
     return render(request, 'booking/my_bookings.html', {
         'future_bookings': future_bookings,
-        'past_bookings': past_bookings
+        'past_bookings': past_bookings,
+        'active_bookings': active_bookings
     })
 
 def login_view(request):

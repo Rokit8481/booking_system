@@ -3,7 +3,18 @@
 {% block title %}Бронювання{% endblock %}
 
 {% block content %}
-
-
+    <div class="container mt-4">
+        <a href="{% url 'room' room.pk %}" class="btn btn-secondary mb-3">Назад</a>
+        <div class="card">
+            <div class="card-body">
+                <h5>Забронювати: <strong>{{ room.name }}</strong></h5>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Забронювати</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
 {% endblock %}

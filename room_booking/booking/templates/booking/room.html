@@ -43,14 +43,13 @@
   <div class="d-flex justify-content-between border p-2 rounded mb-3">
     <div><strong>{{ room.capacity }}</strong> ос.</div>
     <div>Ціна: <strong>{{ room.price_per_hour }}</strong> грн/год</div>
-  </div>
-
-  <div class="mb-3 text-center">
-    {% if room.is_active %}
-      <span class="text-success">🟢Доступно</span>
-    {% else %}
-      <span class="text-danger">🔴Недоступно</span>
-    {% endif %}
+    <div>
+      {% if room.is_active %}
+        <span class="text-success">🟢Доступно</span>
+      {% else %}
+        <span class="text-danger">🔴Недоступно</span>
+      {% endif %}
+    </div>
   </div>
 
   <div class="border rounded p-3 bg-light">
