@@ -62,12 +62,9 @@
           </li>
           <div class="d-flex justify-content-between mb-2">
             <div>
-              <a href="{% url 'edit_booking' booking.pk %}" class="btn btn-outline-success btn-sm">Редагувати бронювання</a>
-            </div>
-            <div>
               <form action="{% url 'cancel_booking' booking.pk %}" method="POST">
                 {% csrf_token %}
-                <button type="submit">Скасувати бронювання</button>
+                <button type="submit">Видалити бронювання</button>
             </div>
           </div>
         {% endfor %}

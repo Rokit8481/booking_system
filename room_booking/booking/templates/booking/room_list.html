@@ -3,11 +3,71 @@
 {% block title %}Кімнати{% endblock %}
 
 {% block content %}
-<div class="container">
-  <h2>Список кімнат</h2>
+<div class="container py-4">
+  <h2 class="mb-3">Список кімнат</h2>
+
+  <div class="d-flex flex-wrap gap-3 mb-3 align-items-start">
+    <div>
+      <div class="btn-group" role="group" aria-label="Фільтр місткості">
+        <span class="btn btn-sm btn-secondary disabled">Місткість:</span>
+        <a href="{% url 'room_list' %}?{% if sort %}sort={{ sort }}&{% endif %}capacity=all" 
+           class="btn btn-sm {% if not capacity or capacity == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+          Усі
+        </a>
+        <a href="{% url 'room_list' %}?{% if sort %}sort={{ sort }}&{% endif %}capacity=2" 
+           class="btn btn-sm {% if capacity == '2' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+          2-місні
+        </a>
+        <a href="{% url 'room_list' %}?{% if sort %}sort={{ sort }}&{% endif %}capacity=4plus" 
+           class="btn btn-sm {% if capacity == '4plus' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+          4+ місні
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <div class="btn-group" role="group" aria-label="Сортування">
+        <span class="btn btn-sm btn-secondary disabled">Сортування:</span>
+        <a href="{% url 'room_list' %}?{% if capacity %}capacity={{ capacity }}&{% endif %}sort=cheap" 
+           class="btn btn-sm {% if sort == 'cheap' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+          Дешеві спочатку
+        </a>
+        <a href="{% url 'room_list' %}?{% if capacity %}capacity={{ capacity }}&{% endif %}sort=expensive" 
+           class="btn btn-sm {% if sort == 'expensive' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+          Дорогі спочатку
+        </a>
+        <a href="{% url 'room_list' %}?{% if capacity %}capacity={{ capacity }}&{% endif %}sort=bookings" 
+           class="btn btn-sm {% if sort == 'bookings' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+          Найбільше бронювань
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <a href="{% url 'room_list' %}" class="btn btn-sm btn-outline-danger">Скинути фільтри</a>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    {% if capacity and capacity != 'all' or sort %}
+      <div>
+        <strong>Вибрано:</strong>
+        {% if capacity and capacity != 'all' %}
+          <span class="badge bg-info text-dark me-1">
+            {% if capacity == '2' %}2-місні{% elif capacity == '4plus' %}4+ місні{% endif %}
+          </span>
+        {% endif %}
+        {% if sort %}
+          <span class="badge bg-warning text-dark me-1">
+            {% if sort == 'cheap' %}Дешеві спочатку{% elif sort == 'expensive' %}Дорогі спочатку{% elif sort == 'bookings' %}Найбільше бронювань{% endif %}
+          </span>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
 
   {% for room in rooms %}
-    <div class="card mb-4">
+    <div class="card mb-4 shadow-sm">
       <div class="row g-0">
         <div class="col-md-4">
           {% if room.images.all %}
@@ -16,17 +76,19 @@
               {% for image in room.images.all %}
                 <div class="carousel-item {% if forloop.first %}active{% endif %}">
                   <a href="{% url 'room' room.pk %}">
-                    <img src="{{ image.image.url }}" class="d-block w-100" style="height: 200px; object-fit: cover;" alt="Фото кімнати">
+                    <img src="{{ image.image.url }}" class="d-block w-100" style="height: 250px; object-fit: cover;" alt="Фото кімнати">
                   </a>
                 </div>
               {% endfor %}
             </div>
             {% if room.images.count > 1 %}
               <button class="carousel-control-prev" type="button" data-bs-target="#carouselRoom{{ room.id }}" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon"></span>
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Попереднє</span>
               </button>
               <button class="carousel-control-next" type="button" data-bs-target="#carouselRoom{{ room.id }}" data-bs-slide="next">
-                <span class="carousel-control-next-icon"></span>
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Наступне</span>
               </button>
             {% endif %}
           </div>
@@ -40,16 +102,19 @@
         <div class="col-md-8">
           <div class="card-body">
             <h5 class="card-title">Кімната №{{ room.number }}</h5>
-            <p class="card-text">{{ room.description|default:"Без опису" }}</p>
-            <p>Ціна: {{ room.price_per_hour }} грн/год</p>
-            <p>Вмістимість: {{ room.capacity }} ос.</p>
+            <p class="card-text mb-1">{{ room.description|default:"Без опису" }}</p>
+            <p class="mb-1">Ціна: <strong>{{ room.price_per_hour }} грн/год</strong></p>
+            <p class="mb-1">Вмістимість: <strong>{{ room.capacity }} ос.</strong></p>
+            {% if room.num_bookings is not None %}
+              <p class="mb-2">Бронювань: <strong>{{ room.num_bookings }}</strong></p>
+            {% endif %}
             <a href="{% url 'room' room.pk %}" class="btn btn-sm btn-outline-primary">Деталі</a>
           </div>
         </div>
       </div>
     </div>
   {% empty %}
-    <div class="alert alert-info">Немає доступних кімнат.</div>
+    <div class="alert alert-info">Немає доступних кімнат за вибраними фільтрами.</div>
   {% endfor %}
 </div>
 {% endblock %}

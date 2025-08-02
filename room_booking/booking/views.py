@@ -1,17 +1,39 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from .models import Room, Booking
-from django.http import HttpRequest
+from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
 from .forms import BookingForm
 
 
+from django.db.models import Count, Q
+
 def room_list(request: HttpRequest):
-    rooms = Room.objects.all().order_by('-number')
+    rooms = Room.objects.filter(is_active=True)
+    
+    capacity = request.GET.get('capacity')
+    if capacity == '2':
+        rooms = rooms.filter(capacity=2)
+    elif capacity == '4plus':
+        rooms = rooms.filter(capacity__gte=4)
+
+
+    sort = request.GET.get('sort') 
+    if sort == 'cheap':
+        rooms = rooms.order_by('price_per_hour')
+    elif sort == 'expensive':
+        rooms = rooms.order_by('-price_per_hour')
+    elif sort == 'bookings':
+        rooms = rooms.annotate(num_bookings=Count('bookings')).order_by('-num_bookings')
+    else:
+        rooms = rooms.annotate(num_bookings=Count('bookings'))
+
     return render(request, 'booking/room_list.html', {
-        'rooms': rooms
+        'rooms': rooms,
+        'capacity': capacity,
+        'sort': sort,
     })
 
 def room(request: HttpRequest, pk):
@@ -100,3 +122,14 @@ def register(request: HttpRequest):
     else:
         form = UserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
+
+def room_availability(request, pk):
+    room = get_object_or_404(Room, pk=pk)
+    bookings = Booking.objects.filter(room=room).exclude(status='cancelled')
+    data = []
+    for b in bookings:
+        data.append({
+            'start': b.start_time.isoformat(),
+            'end': b.end_time.isoformat(),
+        })
+    return JsonResponse(data, safe=False)

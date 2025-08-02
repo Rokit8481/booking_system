@@ -3,18 +3,119 @@
 {% block title %}Бронювання{% endblock %}
 
 {% block content %}
-    <div class="container mt-4">
-        <a href="{% url 'room' room.pk %}" class="btn btn-secondary mb-3">Назад</a>
-        <div class="card">
-            <div class="card-body">
-                <h5>Забронювати: <strong>{{ room.name }}</strong></h5>
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Забронювати</button>
-                </form>
-            </div>
+<div class="container mt-4">
+  <a href="{% url 'room' room.pk %}" class="btn btn-secondary mb-3">Назад</a>
+  <div class="card">
+    <div class="card-body">
+      <h5>Забронювати: <strong>Кімната №{{ room.number }}</strong></h5>
+      <form method="post" id="booking-form">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="id_start_time" class="form-label">Початок</label>
+          {{ form.start_time }}
         </div>
-    </div>
+        <div class="mb-3">
+          <label for="id_end_time" class="form-label">Кінець</label>
+          {{ form.end_time }}
+        </div>
+        <div class="mb-2" id="availability-warning" style="display:none;">
+          <div class="alert alert-danger small">
+            Обраний інтервал перетинається з існуючим бронюванням або некоректний.
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="submit-btn">Забронювати</button>
+      </form>
 
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const startInput = document.querySelector('#id_start_time');
+  const endInput = document.querySelector('#id_end_time');
+  const roomPk = "{{ room.pk }}";
+  let busyRanges = [];
+
+  fetch("{% url 'room_availability' room.pk %}")
+    .then(res => res.json())
+    .then(data => {
+      busyRanges = data.map(b => ({
+        from: b.start,
+        to: b.end
+      }));
+
+      const commonOpts = {
+        enableTime: true,
+        dateFormat: "Y-m-d\\TH:i", 
+        minDate: "today",
+        disable: busyRanges,
+        onChange: validateInterval
+      };
+
+      flatpickr(startInput, Object.assign({}, commonOpts));
+      flatpickr(endInput, Object.assign({}, commonOpts));
+
+      renderBusyList(data);
+    });
+
+  function parseISO(s) {
+    return new Date(s);
+  }
+
+  function validateInterval(selectedDates, dateStr, instance) {
+    const startVal = document.querySelector('#id_start_time').value;
+    const endVal = document.querySelector('#id_end_time').value;
+    const warningBox = document.getElementById('availability-warning');
+    const submitBtn = document.getElementById('submit-btn');
+
+    if (!startVal || !endVal) {
+      warningBox.style.display = 'none';
+      submitBtn.disabled = false;
+      return;
+    }
+
+    const start = new Date(startVal);
+    const end = new Date(endVal);
+
+    let invalid = false;
+
+    if (end <= start) invalid = true;
+
+    busyRanges.forEach(r => {
+      const busyStart = new Date(r.from);
+      const busyEnd = new Date(r.to);
+      if (start < busyEnd && end > busyStart) {
+        invalid = true;
+      }
+    });
+
+    if (invalid) {
+      warningBox.style.display = 'block';
+      submitBtn.disabled = true;
+    } else {
+      warningBox.style.display = 'none';
+      submitBtn.disabled = false;
+    }
+  }
+
+  function renderBusyList(data) {
+    const container = document.getElementById('busy-calendar');
+    if (!data.length) {
+      container.innerHTML = '<p class="text-success">Немає зайнятих інтервалів. Можна бронювати.</p>';
+      return;
+    }
+    const list = document.createElement('ul');
+    list.className = 'list-group';
+    data.forEach(b => {
+      const li = document.createElement('li');
+      li.className = 'list-group-item';
+      const start = new Date(b.start);
+      const end = new Date(b.end);
+      li.textContent = `${start.toLocaleString()} — ${end.toLocaleString()}`;
+      list.appendChild(li);
+    });
+    container.appendChild(list);
+  }
+});
+</script>
 {% endblock %}
