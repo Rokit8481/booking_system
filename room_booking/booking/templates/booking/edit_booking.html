@@ -11,6 +11,16 @@
       <form method="post" id="edit-booking-form">
         {% csrf_token %}
         <div class="mb-3">
+          <label for="{{ form.email.id_for_label }}" class="form-label">Електронна пошта</label>
+          {{ form.email }}
+          {{ form.email.errors }}
+        </div>
+        <div class="mb-3">
+          <label for="{{ form.birth_date.id_for_label }}" class="form-label">Дата народження</label>
+          {{ form.birth_date }}
+          {{ form.birth_date.errors }}
+        </div>    
+        <div class="mb-3">
           <label for="id_start_time" class="form-label">Початок</label>
           {{ form.start_time }}
         </div>
