@@ -10,9 +10,27 @@
     {% if future_bookings %}
       <ul class="list-group mb-4">
         {% for booking in future_bookings %}
-          <li class="list-group-item">
-            Кімната №{{ booking.room.number }}: з {{ booking.start_time|date:"d.m.Y H:i" }} до {{ booking.end_time|date:"d.m.Y H:i" }}
-          </li>
+        <li class="list-group-item">
+          Створено в <strong>{{ booking.created_at|date:"d.m.Y H:i" }}</strong>
+          <div class="d-flex justify-content-between mb-2">
+            <div>
+              Кімната №{{ booking.room.number }}: <strong>з {{ booking.start_time|date:"d.m.Y H:i" }} до {{ booking.end_time|date:"d.m.Y H:i" }}</strong>
+            </div>
+            <div>
+              Статус бронювання: 
+              <strong>{% with booking.get_status_display as status %}
+                {% if status == 'Очікує підтвердження' %}
+                <span class="text-warning">🟡{{ status }}</span>
+                {% elif status == 'Підтверджено' %}
+                  <span class="text-success">🟢{{ status }}</span>
+                {% else %}
+                  <span class="text-danger">🔴{{ status }}</span>
+                {% endif %}
+              {% endwith %}
+              </strong>
+            </div>
+          </div>
+        </li>
           <div class="d-flex justify-content-between mb-2">
             <div>
               <a href="{% url 'edit_booking' booking.pk %}" class="btn btn-outline-success btn-sm">Редагувати бронювання</a>
@@ -20,7 +38,8 @@
             <div>
               <form action="{% url 'cancel_booking' booking.pk %}" method="POST">
                 {% csrf_token %}
-                <button type="submit">Скасувати бронювання</button>
+                <button type="submit" class="btn btn-outline-success btn-sm">Скасувати бронювання</button>
+              </form>
             </div>
           </div>
         {% endfor %}
@@ -34,7 +53,25 @@
       <ul class="list-group mb-4">
         {% for booking in active_bookings %}
           <li class="list-group-item">
-            Кімната №{{ booking.room.number }}: з {{ booking.start_time|date:"d.m.Y H:i" }} до {{ booking.end_time|date:"d.m.Y H:i" }}
+            Створено в <strong>{{ booking.created_at|date:"d.m.Y H:i" }}</strong>
+            <div class="d-flex justify-content-between mb-2">
+              <div>
+                Кімната №{{ booking.room.number }}: <strong>з {{ booking.start_time|date:"d.m.Y H:i" }} до {{ booking.end_time|date:"d.m.Y H:i" }}</strong>
+              </div>
+              <div>
+                Статус бронювання: 
+                <strong>{% with booking.get_status_display as status %}
+                  {% if status == 'Очікує підтвердження' %}
+                  <span class="text-warning">🟡{{ status }}
+                  {% elif status == 'Підтверджено' %}
+                    <span class="text-success">🟢{{ status }}</span>
+                  {% else %}
+                    <span class="text-danger">🔴{{ status }}</span>
+                  {% endif %}
+                {% endwith %}
+                </strong>
+              </div>
+            </div>
           </li>
           <div class="d-flex justify-content-between mb-2">
             <div>
@@ -43,7 +80,8 @@
             <div>
               <form action="{% url 'cancel_booking' booking.pk %}" method="POST">
                 {% csrf_token %}
-                <button type="submit">Скасувати бронювання</button>
+                <button type="submit" class="btn btn-outline-success btn-sm">Скасувати бронювання</button>
+              </form>
             </div>
           </div>
         {% endfor %}
@@ -53,18 +91,36 @@
     {% endif %}
 
 
-    <h4>Минулих:</h4>
+    <h4>Минулі:</h4>
     {% if past_bookings %}
       <ul class="list-group">
         {% for booking in past_bookings %}
-          <li class="list-group-item">
-            Кімната №{{ booking.room.number }}: з {{ booking.start_time|date:"d.m.Y H:i" }} до {{ booking.end_time|date:"d.m.Y H:i" }}
-          </li>
+        <li class="list-group-item">
+          Створено в <strong>{{ booking.created_at|date:"d.m.Y H:i" }}</strong>
+          <div class="d-flex justify-content-between mb-2">
+            <div>
+              Кімната №{{ booking.room.number }}: <strong>з {{ booking.start_time|date:"d.m.Y H:i" }} до {{ booking.end_time|date:"d.m.Y H:i" }}</strong>
+            </div>
+            <div>
+              Статус бронювання: 
+              <strong>{% with booking.get_status_display as status %}
+                {% if status == 'Очікує підтвердження' %}
+                <span class="text-warning">🟡{{ status }}
+                {% elif status == 'Підтверджено' %}
+                  <span class="text-success">🟢{{ status }}</span>
+                {% else %}
+                  <span class="text-danger">🔴{{ status }}</span>
+                {% endif %}
+              {% endwith %}
+              </strong>
+            </div>
+          </div>
+        </li>
           <div class="d-flex justify-content-between mb-2">
             <div>
               <form action="{% url 'cancel_booking' booking.pk %}" method="POST">
                 {% csrf_token %}
-                <button type="submit">Видалити бронювання</button>
+                <button type="submit" class="btn btn-outline-success btn-sm">Видалити бронювання</button>
             </div>
           </div>
         {% endfor %}

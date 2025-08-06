@@ -20,7 +20,7 @@ class RoomImage(models.Model):
     image = models.ImageField(upload_to = 'room_images/')
 
     def __str__(self):
-        return f"Фото кімнати №{self.room}"
+        return f"Фото кімнати №{self.room.number}"
     
     class Meta:
         verbose_name = "Фото кімнати"

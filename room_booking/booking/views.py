@@ -19,7 +19,6 @@ def room_list(request: HttpRequest):
     elif capacity == '4plus':
         rooms = rooms.filter(capacity__gte=4)
 
-
     sort = request.GET.get('sort') 
     if sort == 'cheap':
         rooms = rooms.order_by('price_per_hour')
