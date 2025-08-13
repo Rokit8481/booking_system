@@ -6,9 +6,9 @@ from .models import Room, Booking
 from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
 from .forms import BookingForm
-
-
-from django.db.models import Count, Q
+from room_booking.settings import DEFAULT_FROM_EMAIL
+from django.core.mail import send_mail
+from django.db.models import Count
 
 def room_list(request: HttpRequest):
     rooms = Room.objects.filter(is_active=True)
@@ -52,7 +52,24 @@ def book_room(request: HttpRequest, pk: int):
         form = BookingForm(request.POST, instance=booking)
         if form.is_valid():
             form.save()
+
+            send_mail(
+                subject='Підтвердження бронювання кімнати',
+                message=(
+                    f"Вітаємо, {request.user.username}!\n\n"
+                    f"Ви успішно забронювали кімнату №{room.number}.\n"
+                    f"Зараз статус вашого бронювання: {booking.get_status_display()}.\n"
+                    f"Дата та час початку: {booking.start_time.strftime('%Y-%m-%d %H:%M')}\n"
+                    f"Дата та час завершення: {booking.end_time.strftime('%Y-%m-%d %H:%M')}\n"
+                    f"Створено: {booking.created_at.strftime('%Y-%m-%d %H:%M')}\n\n"
+                    f"Дякуємо, що обрали нас!"
+                ),
+                from_email = DEFAULT_FROM_EMAIL,
+                recipient_list = [booking.email],
+                fail_silently = False,
+            )
             return redirect('my_bookings')
+        
     else:
         form = BookingForm(instance=booking)
 
