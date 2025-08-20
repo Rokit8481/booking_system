@@ -5,6 +5,8 @@
 {% block content %}
   <div class="container mt-4">
     <h2 class="mb-4">Бронювання користувача: {{user.username}}</h2>
+    <p><strong>Ваша пошта:</strong> {{ user.email }}</p>
+    <p><strong>Дата народження:</strong> {{ user.birth_date }}</p>
 
     <h4>Майбутні:</h4>
     {% if future_bookings %}

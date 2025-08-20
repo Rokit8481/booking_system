@@ -1,5 +1,8 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.contrib.auth.models import User
+
+class CustomUser(AbstractUser):
+    birth_date = models.DateField(blank=True, null=True)
 
 class Room(models.Model):
     number = models.PositiveIntegerField(unique = True)
@@ -27,10 +30,8 @@ class RoomImage(models.Model):
         verbose_name_plural = "Фото кімнат"
 
 class Booking(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='bookings')
     room = models.ForeignKey(Room, on_delete = models.CASCADE, related_name = 'bookings')
-    email = models.EmailField(blank=False, null=False)
-    birth_date = models.DateField(blank=False, null=False)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add = True)

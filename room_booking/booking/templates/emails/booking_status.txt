@@ -1,0 +1,7 @@
+Шановний {{ user.username }},
+
+Ваше бронювання №{{ booking.id }} змінило статус з {{ old_status }} на {{ booking.get_status_display }}.
+
+Кімната №{{ room.number }}, {{ room.capacity }} осіб, {{ room.price_per_hour }} грн/год.
+
+Дякуємо за використання моєї системи бронювання!

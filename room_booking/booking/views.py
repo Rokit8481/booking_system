@@ -1,13 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm
 from .models import Room, Booking
 from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
-from .forms import BookingForm
+from .forms import BookingForm, CustomUserCreationForm
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from room_booking.settings import DEFAULT_FROM_EMAIL
-from django.core.mail import send_mail
 from django.db.models import Count
 
 def room_list(request: HttpRequest):
@@ -49,27 +50,32 @@ def book_room(request: HttpRequest, pk: int):
     booking = Booking(user=request.user, room=room)
 
     if request.method == 'POST':
-        form = BookingForm(request.POST, instance=booking)
+        form = BookingForm(request.POST, instance=booking, room=room)
         if form.is_valid():
-            form.save()
+            booking = form.save()
 
-            send_mail(
-                subject='Підтвердження бронювання кімнати',
-                message=(
-                    f"Вітаємо, {request.user.username}!\n\n"
-                    f"Ви успішно забронювали кімнату №{room.number}.\n"
-                    f"Зараз статус вашого бронювання: {booking.get_status_display()}.\n"
-                    f"Дата та час початку: {booking.start_time.strftime('%Y-%m-%d %H:%M')}\n"
-                    f"Дата та час завершення: {booking.end_time.strftime('%Y-%m-%d %H:%M')}\n"
-                    f"Створено: {booking.created_at.strftime('%Y-%m-%d %H:%M')}\n\n"
-                    f"Дякуємо, що обрали нас!"
-                ),
-                from_email = DEFAULT_FROM_EMAIL,
-                recipient_list = [booking.email],
-                fail_silently = False,
+            context = {
+                "user": request.user,
+                "booking": booking,
+                "room": room,
+                "email": request.user.email,
+                "birth_date": request.user.birth_date,
+            }
+
+            subject = "Підтвердження бронювання кімнати"
+            text_message = render_to_string("emails/booking_confirm.txt", context)
+            html_message = render_to_string("emails/booking_confirm.html", context)
+
+            email = EmailMultiAlternatives(
+                subject=subject,
+                body=text_message,
+                from_email=DEFAULT_FROM_EMAIL,
+                to=[request.user.email],
             )
+            email.attach_alternative(html_message, "text/html")
+            email.send()
+
             return redirect('my_bookings')
-        
     else:
         form = BookingForm(instance=booking)
 
@@ -82,6 +88,7 @@ def book_room(request: HttpRequest, pk: int):
 def cancel_booking(request: HttpRequest, pk: int):
     booking = get_object_or_404(Booking, pk=pk, user=request.user)
     if request.method == 'POST':
+        booking.status = 'cancelled'
         booking.delete()
         return redirect('my_bookings')
     return render(request, 'booking/my_bookings.html', {'booking': booking})
@@ -130,13 +137,13 @@ def logout_view(request: HttpRequest):
 
 def register(request: HttpRequest):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             return redirect('room_list')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
 
 def room_availability(request, pk):

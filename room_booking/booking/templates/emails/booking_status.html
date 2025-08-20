@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style> 
+    body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .email-container {
+        max-width: 600px;
+        margin: auto;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .email-header {
+        padding: 15px;
+        text-align: center;
+        background-color: #f8f9fa;
+    }
+    
+    .email-header h2 {
+        margin: 0;
+    }
+    
+    .email-header p {
+        margin: 5px 0;
+        font-size: 16px;
+    }
+    
+    .status-available {
+        color: green;
+        font-weight: bold;
+    }
+    
+    .status-unavailable {
+        color: red;
+        font-weight: bold;
+    }
+    
+    .email-body {
+        padding: 15px;
+    }
+    </style>
+</head>
+<body>
+
+<div class="email-container">
+
+    <div class="email-header">
+        <h2>Кімната №{{ room.number }}</h2>
+        <p>{{ room.capacity }} осіб • {{ room.price_per_hour }} грн/год</p>
+        {% if room.is_active %}
+            <p class="status-available">🟢 Доступно</p>
+        {% else %}
+            <p class="status-unavailable">🔴 Недоступно</p>
+        {% endif %}
+    </div>
+
+    <div class="email-body">
+        <p>Шановний <strong>{{ user.username }}</strong>,</p>
+        <p>
+            Ваше бронювання <strong>№{{ booking.id }}</strong> змінило статус з 
+            <em>{{ old_status }}</em> на 
+            <strong>{{ booking.get_status_display }}</strong>.
+        </p>
+        <p>Дякуємо за використання моєї системи бронювання!</p>
+    </div>
+
+</div>
+
+</body>
+</html>

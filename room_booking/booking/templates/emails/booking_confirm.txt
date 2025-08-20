@@ -1,0 +1,7 @@
+Шановний {{ user.username }}!
+Ваша бронь на {{ booking.room.number }} підтверджена!
+Кімната №{{ room.number }}, {{ room.capacity }} осіб, {{ room.price_per_hour }} грн/год.
+Зараз її статус {{ booking.get_status_display }}.
+Дякуємо за використання моєї системи бронювання!
+
+

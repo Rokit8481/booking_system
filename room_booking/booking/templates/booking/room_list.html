@@ -76,7 +76,7 @@
               {% for image in room.images.all %}
                 <div class="carousel-item {% if forloop.first %}active{% endif %}">
                   <a href="{% url 'room' room.pk %}">
-                    <img src="{{ image.image.url }}" class="d-block w-100" style="height: 250px; object-fit: cover;" alt="Фото кімнати">
+                    <img src="{{ image.image.url }}" class="d-block w-100" style="height: 270px; object-fit: cover;" alt="Фото кімнати">
                   </a>
                 </div>
               {% endfor %}
