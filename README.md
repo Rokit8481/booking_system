@@ -31,7 +31,7 @@
 ## ⚙️ Встановлення
 1. Клонуйте репозиторій:
    ```bash
-   git clone https://github.com/yourusername/booking_system.git
+   git clone https://github.com/Rokit8481/booking_system.git
    cd booking_system
    
 2. Створіть віртуальне середовище:
